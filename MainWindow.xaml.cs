@@ -10,12 +10,16 @@ using System.Windows.Navigation;
 using System;
 using System.IO;
 using AIWebPageSummarizer.Services;
+using Microsoft.Web.WebView2.Core;
+using System.Windows.Forms;
 
 namespace AIWebPageSummarizer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    /// 
+
     public partial class MainWindow : Window
     {
         public MainWindow()
@@ -23,6 +27,28 @@ namespace AIWebPageSummarizer
             InitializeComponent();
 
             Loaded += MainWindow_Loaded;
+        }
+
+        private async Task CaptureSummaryPreviewAsync()
+        {
+            string folder = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Screenshots");
+
+            Directory.CreateDirectory(folder);
+
+            string fileName = $"Summary_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png";
+
+            string imagePath = Path.Combine(folder, fileName);
+
+            using FileStream stream = new FileStream(
+                imagePath,
+                FileMode.Create,
+                FileAccess.Write);
+
+            await webView.CoreWebView2.CapturePreviewAsync(
+                CoreWebView2CapturePreviewImageFormat.Png,
+                stream);
         }
 
 
@@ -41,44 +67,47 @@ namespace AIWebPageSummarizer
         }
 
         private async void CoreWebView2_WebMessageReceived(
-    object? sender,
-    Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+     object? sender,
+     Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
                 string message = e.TryGetWebMessageAsString();
 
+                if (message == "summaryRendered")
+                {
+                    System.Windows.MessageBox.Show("C# received summaryRendered");
+
+                    await CaptureSummaryPreviewAsync();
+
+                    return;
+                }
+
                 if (message != "summarize")
                     return;
 
-               
                 await webView.CoreWebView2.ExecuteScriptAsync("showLoading();");
 
-                
-                await Task.Delay(100);
-
-                
                 ScreenshotService screenshotService = new ScreenshotService();
-                string imagePath = screenshotService.CaptureScreen();
 
-               
+                string originalImagePath = screenshotService.CaptureScreen();
+
                 AIService aiService = new AIService();
-                string summary = await aiService.SummarizeImageAsync(imagePath);
 
-               
+                string summary = await aiService.SummarizeImageAsync(originalImagePath);
+
                 string jsonSummary = System.Text.Json.JsonSerializer.Serialize(summary);
 
-               
                 await webView.CoreWebView2.ExecuteScriptAsync(
                     $"showSummary({jsonSummary});");
             }
             catch (Exception ex)
             {
-                string jsonError = System.Text.Json.JsonSerializer.Serialize(ex.Message);
+                string jsonError = System.Text.Json.JsonSerializer.Serialize(ex.ToString());
 
                 await webView.CoreWebView2.ExecuteScriptAsync(
                     $"showError({jsonError});");
             }
         }
     }
-}
+    }

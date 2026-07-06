@@ -59,6 +59,8 @@ function showLoading() {
 
 function showSummary(summary) {
 
+    console.log("showSummary called");
+
     currentSummary = summary;
 
     loadingPage.classList.add("hidden");
@@ -67,6 +69,11 @@ function showSummary(summary) {
 
     summaryText.innerText = summary;
 
+    console.log("Summary inserted into page");
+
+    alert("JS reached end of showSummary");
+
+    window.chrome.webview.postMessage("summaryRendered");
 }
 
 // ==========================

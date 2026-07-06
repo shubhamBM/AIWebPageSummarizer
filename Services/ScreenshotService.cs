@@ -28,7 +28,9 @@ namespace AIWebPageSummarizer.Services
 
             Directory.CreateDirectory(folder);
 
-            string imagePath = Path.Combine(folder, "screen.png");
+            string fileName = $"Screen_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png";
+
+            string imagePath = Path.Combine(folder, fileName);
 
             bitmap.Save(imagePath, ImageFormat.Png);
 

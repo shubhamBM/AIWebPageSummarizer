@@ -1,0 +1,92 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>AI Web Page Summarizer</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🤖 AI Web Page Summarizer</h1>
+
+        <p class="subtitle">
+
+            Capture your current screen and let Gemini AI summarize it.
+
+        </p>
+
+        <!-- HOME -->
+
+        <div id="homePage">
+
+            <button id="summarizeBtn">
+
+                🚀 Summarize This Page
+
+            </button>
+
+        </div>
+
+        <!-- LOADING -->
+
+        <div id="loadingPage" class="hidden">
+
+            <div class="spinner"></div>
+
+            <h2>Generating Summary...</h2>
+
+            <p id="loadingText">
+
+                Capturing Screenshot...
+
+            </p>
+
+        </div>
+
+        <!-- SUMMARY -->
+
+        <div id="summaryPage" class="hidden">
+
+            <h2>📄 AI Summary</h2>
+
+            <pre id="summaryText"></pre>
+
+            <div class="buttonGroup">
+
+                <button id="copyBtn">
+
+                    📋 Copy Summary
+
+                </button>
+
+                <button id="saveBtn">
+
+                    💾 Save Summary
+
+                </button>
+
+                <button id="backBtn">
+
+                    🔄 Summarize Again
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

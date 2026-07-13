@@ -13,21 +13,20 @@ const backBtn = document.getElementById("backBtn");
 
 let currentSummary = "";
 
-// ==========================
-// Summarize Button
-// ==========================
+
 
 summarizeBtn.addEventListener("click", () => {
 
     showLoading();
 
-    window.chrome.webview.postMessage("summarize");
+    requestAnimationFrame(() => {
+
+        window.chrome.webview.postMessage("Summarize");
+
+    });
 
 });
 
-// ==========================
-// Loading Screen
-// ==========================
 
 function showLoading() {
 
@@ -36,32 +35,47 @@ function showLoading() {
     summaryPage.classList.add("hidden");
 
     loadingPage.classList.remove("hidden");
-
-    loadingText.innerText = "📷 Capturing Screenshot...";
-
-    setTimeout(() => {
-
-        loadingText.innerText = "☁ Uploading Screenshot to Gemini...";
-
-    }, 1200);
-
-    setTimeout(() => {
-
-        loadingText.innerText = "🧠 Gemini is generating summary...";
-
-    }, 2500);
-
 }
 
-// ==========================
-// Summary Screen
-// ==========================
+
+
+function updateLoadingState(state) {
+
+    switch (state) {
+
+        case "Capturing":
+
+            loadingText.innerText = "📷 Capturing Screenshot...";
+            break;
+
+        case "Uploading":
+
+            loadingText.innerText = "☁ Uploading Screenshot to Gemini...";
+            break;
+
+        case "Processing":
+
+            loadingText.innerText = "🧠 Gemini is generating summary...";
+            break;
+
+        case "Completed":
+
+            loadingText.innerText = "✅ Summary Generated";
+            break;
+
+        default:
+
+            loadingText.innerText = state;
+            break;
+    }
+}
+
 
 function showSummary(summary) {
 
-    console.log("showSummary called");
-
     currentSummary = summary;
+
+    updateLoadingState("Completed");
 
     loadingPage.classList.add("hidden");
 
@@ -69,16 +83,10 @@ function showSummary(summary) {
 
     summaryText.innerText = summary;
 
-    console.log("Summary inserted into page");
-
-    alert("JS reached end of showSummary");
-
     window.chrome.webview.postMessage("summaryRendered");
 }
 
-// ==========================
-// Error Screen
-// ==========================
+
 
 function showError(message) {
 
@@ -90,9 +98,6 @@ function showError(message) {
 
 }
 
-// ==========================
-// Copy Summary
-// ==========================
 
 copyBtn.addEventListener("click", async () => {
 
@@ -104,13 +109,10 @@ copyBtn.addEventListener("click", async () => {
 
         copyBtn.innerText = "📋 Copy Summary";
 
-    }, 2000);
+    });
 
 });
 
-// ==========================
-// Save Summary
-// ==========================
 
 saveBtn.addEventListener("click", () => {
 
@@ -126,9 +128,6 @@ saveBtn.addEventListener("click", () => {
 
 });
 
-// ==========================
-// Summarize Again
-// ==========================
 
 backBtn.addEventListener("click", () => {
 

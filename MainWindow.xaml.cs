@@ -67,8 +67,8 @@ namespace AIWebPageSummarizer
         }
 
         private async void CoreWebView2_WebMessageReceived(
-     object? sender,
-     Microsoft.Web.WebView2.Core.CoreWebView2WebMessageReceivedEventArgs e)
+      object? sender,
+      CoreWebView2WebMessageReceivedEventArgs e)
         {
             try
             {
@@ -76,34 +76,44 @@ namespace AIWebPageSummarizer
 
                 if (message == "summaryRendered")
                 {
-                    System.Windows.MessageBox.Show("C# received summaryRendered");
-
                     await CaptureSummaryPreviewAsync();
-
                     return;
                 }
 
-                if (message != "summarize")
+                if (message != "Summarize")
                     return;
 
                 await webView.CoreWebView2.ExecuteScriptAsync("showLoading();");
+
+                await webView.CoreWebView2.ExecuteScriptAsync(
+                    "updateLoadingState('Capturing');");
 
                 ScreenshotService screenshotService = new ScreenshotService();
 
                 string originalImagePath = screenshotService.CaptureScreen();
 
+
                 AIService aiService = new AIService();
 
-                string summary = await aiService.SummarizeImageAsync(originalImagePath);
+                string summary = await aiService.SummarizeImageAsync(
+                    originalImagePath,
+                    async state =>
+                    {
+                        await Dispatcher.InvokeAsync(async () =>
+                            await webView.CoreWebView2.ExecuteScriptAsync(
+                                $"updateLoadingState('{state}');"));
+                    });
 
-                string jsonSummary = System.Text.Json.JsonSerializer.Serialize(summary);
+                string jsonSummary =
+                    System.Text.Json.JsonSerializer.Serialize(summary);
 
                 await webView.CoreWebView2.ExecuteScriptAsync(
                     $"showSummary({jsonSummary});");
             }
             catch (Exception ex)
             {
-                string jsonError = System.Text.Json.JsonSerializer.Serialize(ex.ToString());
+                string jsonError =
+                    System.Text.Json.JsonSerializer.Serialize(ex.Message);
 
                 await webView.CoreWebView2.ExecuteScriptAsync(
                     $"showError({jsonError});");
